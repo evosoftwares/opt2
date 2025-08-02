@@ -628,6 +628,22 @@ class _CorridasWidgetState extends State<CorridasWidget> {
                                       hoverColor: Colors.transparent,
                                       highlightColor: Colors.transparent,
                                       onTap: () async {
+                                        await showModalBottomSheet(
+                                          isScrollControlled: true,
+                                          backgroundColor: Colors.transparent,
+                                          enableDrag: false,
+                                          context: context,
+                                          builder: (context) {
+                                            return Padding(
+                                              padding: MediaQuery.viewInsetsOf(
+                                                  context),
+                                              child: AvaliacaoWidget(
+                                                qualCorrida: columnViagensRow,
+                                              ),
+                                            );
+                                          },
+                                        ).then((value) => safeSetState(() {}));
+
                                         await showDialog(
                                           context: context,
                                           builder: (dialogContext) {

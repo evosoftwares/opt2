@@ -292,12 +292,41 @@ class _InicioClienteWidgetState extends State<InicioClienteWidget> {
                       ),
                     ),
                   ),
-                if (valueOrDefault(currentUserDocument?.idViagem, 0) > 0)
-                  Padding(
-                    padding:
-                        EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
-                    child: AuthUserStreamWidget(
-                      builder: (context) => Container(
+                Padding(
+                  padding:
+                      EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
+                  child: FutureBuilder<List<ViagensRow>>(
+                    future: ViagensTable().querySingleRow(
+                      queryFn: (q) => q.or(
+                          "status.eq.${Status.Cancelado.name}, status.eq.${Status.Concluido.name}"),
+                    ),
+                    builder: (context, snapshot) {
+                      // Customize what your widget looks like when it's loading.
+                      if (!snapshot.hasData) {
+                        return Center(
+                          child: SizedBox(
+                            width: 50.0,
+                            height: 50.0,
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                FlutterFlowTheme.of(context).secondary,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      List<ViagensRow> containerViagensRowList = snapshot.data!;
+
+                      // Return an empty Container when the item does not exist.
+                      if (snapshot.data!.isEmpty) {
+                        return Container();
+                      }
+                      final containerViagensRow =
+                          containerViagensRowList.isNotEmpty
+                              ? containerViagensRowList.first
+                              : null;
+
+                      return Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -336,114 +365,120 @@ class _InicioClienteWidgetState extends State<InicioClienteWidget> {
                                           .fontStyle,
                                     ),
                               ),
-                              FutureBuilder<List<ViagensRow>>(
-                                future: ViagensTable().querySingleRow(
-                                  queryFn: (q) => q.eqOrNull(
-                                    'viagemid',
-                                    valueOrDefault(
-                                        currentUserDocument?.idViagem, 0),
+                              AuthUserStreamWidget(
+                                builder: (context) =>
+                                    FutureBuilder<List<ViagensRow>>(
+                                  future: ViagensTable().querySingleRow(
+                                    queryFn: (q) => q.eqOrNull(
+                                      'viagemid',
+                                      valueOrDefault(
+                                          currentUserDocument?.idViagem, 0),
+                                    ),
                                   ),
-                                ),
-                                builder: (context, snapshot) {
-                                  // Customize what your widget looks like when it's loading.
-                                  if (!snapshot.hasData) {
-                                    return Center(
-                                      child: SizedBox(
-                                        width: 50.0,
-                                        height: 50.0,
-                                        child: CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                            FlutterFlowTheme.of(context)
-                                                .secondary,
+                                  builder: (context, snapshot) {
+                                    // Customize what your widget looks like when it's loading.
+                                    if (!snapshot.hasData) {
+                                      return Center(
+                                        child: SizedBox(
+                                          width: 50.0,
+                                          height: 50.0,
+                                          child: CircularProgressIndicator(
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                              FlutterFlowTheme.of(context)
+                                                  .secondary,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    );
-                                  }
-                                  List<ViagensRow> buttonViagensRowList =
-                                      snapshot.data!;
+                                      );
+                                    }
+                                    List<ViagensRow> buttonViagensRowList =
+                                        snapshot.data!;
 
-                                  final buttonViagensRow =
-                                      buttonViagensRowList.isNotEmpty
-                                          ? buttonViagensRowList.first
-                                          : null;
+                                    final buttonViagensRow =
+                                        buttonViagensRowList.isNotEmpty
+                                            ? buttonViagensRowList.first
+                                            : null;
 
-                                  return FFButtonWidget(
-                                    onPressed: () async {
-                                      if (buttonViagensRow?.status ==
-                                          Status.Solicitado.name) {
-                                        context.pushNamed(
-                                          EscolhaMotoristaWidget.routeName,
-                                          queryParameters: {
-                                            'qualCorrida': serializeParam(
-                                              buttonViagensRow,
-                                              ParamType.SupabaseRow,
-                                            ),
-                                          }.withoutNulls,
-                                        );
-                                      } else {
-                                        context.pushNamed(
-                                          DetalhesCorridaClienteWidget
-                                              .routeName,
-                                          queryParameters: {
-                                            'qualCorrida': serializeParam(
-                                              buttonViagensRow,
-                                              ParamType.SupabaseRow,
-                                            ),
-                                            'motoristaId': serializeParam(
-                                              buttonViagensRow
-                                                  ?.motoristaReference,
-                                              ParamType.String,
-                                            ),
-                                          }.withoutNulls,
-                                        );
-                                      }
-                                    },
-                                    text: 'Ir para a corrida',
-                                    options: FFButtonOptions(
-                                      width: double.infinity,
-                                      height: 45.0,
-                                      padding: EdgeInsets.all(8.0),
-                                      iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 0.0, 0.0, 0.0),
-                                      color: FlutterFlowTheme.of(context).info,
-                                      textStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .override(
-                                            font: GoogleFonts.inter(
+                                    return FFButtonWidget(
+                                      onPressed: () async {
+                                        if (buttonViagensRow?.status ==
+                                            Status.Solicitado.name) {
+                                          context.pushNamed(
+                                            EscolhaMotoristaWidget.routeName,
+                                            queryParameters: {
+                                              'qualCorrida': serializeParam(
+                                                buttonViagensRow,
+                                                ParamType.SupabaseRow,
+                                              ),
+                                            }.withoutNulls,
+                                          );
+                                        } else {
+                                          context.pushNamed(
+                                            DetalhesCorridaClienteWidget
+                                                .routeName,
+                                            queryParameters: {
+                                              'qualCorrida': serializeParam(
+                                                buttonViagensRow,
+                                                ParamType.SupabaseRow,
+                                              ),
+                                              'motoristaId': serializeParam(
+                                                buttonViagensRow
+                                                    ?.motoristaReference,
+                                                ParamType.String,
+                                              ),
+                                            }.withoutNulls,
+                                          );
+                                        }
+                                      },
+                                      text: 'Ir para a corrida',
+                                      options: FFButtonOptions(
+                                        width: double.infinity,
+                                        height: 45.0,
+                                        padding: EdgeInsets.all(8.0),
+                                        iconPadding:
+                                            EdgeInsetsDirectional.fromSTEB(
+                                                0.0, 0.0, 0.0, 0.0),
+                                        color:
+                                            FlutterFlowTheme.of(context).info,
+                                        textStyle: FlutterFlowTheme.of(context)
+                                            .titleSmall
+                                            .override(
+                                              font: GoogleFonts.inter(
+                                                fontWeight: FontWeight.w500,
+                                                fontStyle:
+                                                    FlutterFlowTheme.of(context)
+                                                        .titleSmall
+                                                        .fontStyle,
+                                              ),
+                                              color: Colors.white,
+                                              fontSize: 16.0,
+                                              letterSpacing: 0.0,
                                               fontWeight: FontWeight.w500,
                                               fontStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .titleSmall
                                                       .fontStyle,
                                             ),
-                                            color: Colors.white,
-                                            fontSize: 16.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w500,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .fontStyle,
-                                          ),
-                                      elevation: 2.0,
-                                      borderSide: BorderSide(
-                                        color: Colors.transparent,
-                                        width: 1.0,
+                                        elevation: 2.0,
+                                        borderSide: BorderSide(
+                                          color: Colors.transparent,
+                                          width: 1.0,
+                                        ),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
                                       ),
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                  );
-                                },
+                                    );
+                                  },
+                                ),
                               ),
                             ].divide(SizedBox(height: 16.0)),
                           ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
+                ),
                 Padding(
                   padding:
                       EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
