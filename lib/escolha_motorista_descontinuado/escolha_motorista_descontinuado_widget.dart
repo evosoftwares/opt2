@@ -355,6 +355,22 @@ class _EscolhaMotoristaDescontinuadoWidgetState
                                                         .atualizaPessoa
                                                         ?.reference
                                                         .id,
+                                                    'precosugerido':
+                                                        valueOrDefault<double>(
+                                                      (containerUsersRecord
+                                                                      .minhaTarifa *
+                                                                  functions.distanciaOrigemDestino(
+                                                                      functions.strToLatLng(widget
+                                                                          .qualCorrida
+                                                                          ?.origem)!,
+                                                                      functions.strToLatLng(widget
+                                                                          .qualCorrida
+                                                                          ?.destino)!) *
+                                                                  100)
+                                                              .ceilToDouble() /
+                                                          100,
+                                                      0.0,
+                                                    ),
                                                   },
                                                   matchingRows: (rows) =>
                                                       rows.eqOrNull(

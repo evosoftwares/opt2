@@ -219,86 +219,20 @@ class _InicioClienteWidgetState extends State<InicioClienteWidget> {
                     ),
                   ),
                 ),
-                if ((valueOrDefault(currentUserDocument?.idViagem, 0) ==
-                        null) ||
-                    (valueOrDefault(currentUserDocument?.idViagem, 0) <= 0))
-                  Padding(
-                    padding:
-                        EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
-                    child: AuthUserStreamWidget(
-                      builder: (context) => Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              blurRadius: 5.0,
-                              color: Color(0x20000000),
-                              offset: Offset(
-                                0.0,
-                                2.0,
-                              ),
-                            )
-                          ],
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              FFButtonWidget(
-                                onPressed: () async {
-                                  context
-                                      .pushNamed(ChamarCarro1Widget.routeName);
-                                },
-                                text: 'Buscar corrida',
-                                options: FFButtonOptions(
-                                  width: double.infinity,
-                                  height: 45.0,
-                                  padding: EdgeInsets.all(8.0),
-                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 0.0, 0.0),
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .override(
-                                        font: GoogleFonts.inter(
-                                          fontWeight: FontWeight.w500,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontStyle,
-                                        ),
-                                        color: Colors.white,
-                                        fontSize: 16.0,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FontWeight.w500,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontStyle,
-                                      ),
-                                  elevation: 2.0,
-                                  borderSide: BorderSide(
-                                    color: Colors.transparent,
-                                    width: 1.0,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                              ),
-                            ].divide(SizedBox(height: 16.0)),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                 Padding(
                   padding:
                       EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 16.0),
                   child: FutureBuilder<List<ViagensRow>>(
                     future: ViagensTable().querySingleRow(
-                      queryFn: (q) => q.or(
-                          "status.eq.${Status.Cancelado.name}, status.eq.${Status.Concluido.name}"),
+                      queryFn: (q) => q.inFilterOrNull(
+                        'status',
+                        [
+                          'Solicitado',
+                          'Aceito',
+                          'emAndamento',
+                          'motoristaChegou'
+                        ],
+                      ),
                     ),
                     builder: (context, snapshot) {
                       // Customize what your widget looks like when it's loading.

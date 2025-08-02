@@ -27,11 +27,11 @@ class DetalhesCorridaClienteWidget extends StatefulWidget {
   const DetalhesCorridaClienteWidget({
     super.key,
     required this.qualCorrida,
-    required this.motoristaId,
-  });
+    String? motoristaId,
+  }) : this.motoristaId = motoristaId ?? '0';
 
   final ViagensRow? qualCorrida;
-  final String? motoristaId;
+  final String motoristaId;
 
   static String routeName = 'detalhesCorridaCliente';
   static String routePath = 'detalhesCorridaCliente';
@@ -336,101 +336,118 @@ class _DetalhesCorridaClienteWidgetState
                                 child: Padding(
                                   padding: EdgeInsetsDirectional.fromSTEB(
                                       1.0, 0.0, 0.0, 0.0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Seu motorista será:',
-                                        style: FlutterFlowTheme.of(context)
-                                            .labelLarge
-                                            .override(
-                                              font: GoogleFonts.outfit(
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Seu motorista será:',
+                                          style: FlutterFlowTheme.of(context)
+                                              .labelLarge
+                                              .override(
+                                                font: GoogleFonts.outfit(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .labelLarge
+                                                          .fontStyle,
+                                                ),
+                                                color: Color(0xFF57636C),
+                                                fontSize: 16.0,
+                                                letterSpacing: 0.0,
                                                 fontWeight: FontWeight.w500,
                                                 fontStyle:
                                                     FlutterFlowTheme.of(context)
                                                         .labelLarge
                                                         .fontStyle,
                                               ),
-                                              color: Color(0xFF57636C),
-                                              fontSize: 16.0,
-                                              letterSpacing: 0.0,
-                                              fontWeight: FontWeight.w500,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelLarge
-                                                      .fontStyle,
+                                        ),
+                                        Padding(
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  0.0, 0.0, 0.0, 20.0),
+                                          child:
+                                              StreamBuilder<List<UsersRecord>>(
+                                            stream: queryUsersRecord(
+                                              queryBuilder: (usersRecord) =>
+                                                  usersRecord.where(
+                                                'uid',
+                                                isEqualTo:
+                                                    detalhesCorridaClienteViagensRow
+                                                        ?.motoristaReference,
+                                              ),
+                                              singleRecord: true,
                                             ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 0.0, 0.0, 20.0),
-                                        child: StreamBuilder<List<UsersRecord>>(
-                                          stream: queryUsersRecord(
-                                            queryBuilder: (usersRecord) =>
-                                                usersRecord.where(
-                                              'uid',
-                                              isEqualTo:
-                                                  detalhesCorridaClienteViagensRow
-                                                      ?.motoristaReference,
-                                            ),
-                                            singleRecord: true,
-                                          ),
-                                          builder: (context, snapshot) {
-                                            // Customize what your widget looks like when it's loading.
-                                            if (!snapshot.hasData) {
-                                              return Center(
-                                                child: SizedBox(
-                                                  width: 50.0,
-                                                  height: 50.0,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    valueColor:
-                                                        AlwaysStoppedAnimation<
-                                                            Color>(
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .secondary,
+                                            builder: (context, snapshot) {
+                                              // Customize what your widget looks like when it's loading.
+                                              if (!snapshot.hasData) {
+                                                return Center(
+                                                  child: SizedBox(
+                                                    width: 50.0,
+                                                    height: 50.0,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      valueColor:
+                                                          AlwaysStoppedAnimation<
+                                                              Color>(
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .secondary,
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                              );
-                                            }
-                                            List<UsersRecord>
-                                                rowUsersRecordList =
-                                                snapshot.data!;
-                                            // Return an empty Container when the item does not exist.
-                                            if (snapshot.data!.isEmpty) {
-                                              return Container();
-                                            }
-                                            final rowUsersRecord =
-                                                rowUsersRecordList.isNotEmpty
-                                                    ? rowUsersRecordList.first
-                                                    : null;
+                                                );
+                                              }
+                                              List<UsersRecord>
+                                                  rowUsersRecordList =
+                                                  snapshot.data!;
+                                              // Return an empty Container when the item does not exist.
+                                              if (snapshot.data!.isEmpty) {
+                                                return Container();
+                                              }
+                                              final rowUsersRecord =
+                                                  rowUsersRecordList.isNotEmpty
+                                                      ? rowUsersRecordList.first
+                                                      : null;
 
-                                            return Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          0.0, 4.0, 0.0, 0.0),
-                                                  child: Text(
-                                                    valueOrDefault<String>(
-                                                      rowUsersRecord
-                                                          ?.displayName,
-                                                      'nome motorista',
-                                                    ),
-                                                    style: FlutterFlowTheme.of(
-                                                            context)
-                                                        .displaySmall
-                                                        .override(
-                                                          font: GoogleFonts
-                                                              .plusJakartaSans(
+                                              return Row(
+                                                mainAxisSize: MainAxisSize.max,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        EdgeInsetsDirectional
+                                                            .fromSTEB(0.0, 4.0,
+                                                                0.0, 0.0),
+                                                    child: Text(
+                                                      valueOrDefault<String>(
+                                                        rowUsersRecord
+                                                            ?.displayName,
+                                                        'nome motorista',
+                                                      ),
+                                                      style: FlutterFlowTheme
+                                                              .of(context)
+                                                          .displaySmall
+                                                          .override(
+                                                            font: GoogleFonts
+                                                                .plusJakartaSans(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              fontStyle: FlutterFlowTheme
+                                                                      .of(context)
+                                                                  .displaySmall
+                                                                  .fontStyle,
+                                                            ),
+                                                            color: Color(
+                                                                0xFF101518),
+                                                            fontSize: 26.0,
+                                                            letterSpacing: 0.0,
                                                             fontWeight:
                                                                 FontWeight.w500,
                                                             fontStyle:
@@ -439,90 +456,95 @@ class _DetalhesCorridaClienteWidgetState
                                                                     .displaySmall
                                                                     .fontStyle,
                                                           ),
-                                                          color:
-                                                              Color(0xFF101518),
-                                                          fontSize: 26.0,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .displaySmall
-                                                                  .fontStyle,
-                                                        ),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          0.0, 0.0, 10.0, 0.0),
-                                                  child: StreamBuilder<
-                                                      List<ConversasRecord>>(
-                                                    stream:
-                                                        queryConversasRecord(
-                                                      queryBuilder:
-                                                          (conversasRecord) =>
-                                                              conversasRecord
-                                                                  .where(
-                                                        'conversaId',
-                                                        isEqualTo:
-                                                            detalhesCorridaClienteViagensRow
-                                                                ?.idConversa,
-                                                      ),
-                                                      singleRecord: true,
                                                     ),
-                                                    builder:
-                                                        (context, snapshot) {
-                                                      // Customize what your widget looks like when it's loading.
-                                                      if (!snapshot.hasData) {
-                                                        return Center(
-                                                          child: SizedBox(
-                                                            width: 50.0,
-                                                            height: 50.0,
-                                                            child:
-                                                                CircularProgressIndicator(
-                                                              valueColor:
-                                                                  AlwaysStoppedAnimation<
-                                                                      Color>(
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .secondary,
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        EdgeInsetsDirectional
+                                                            .fromSTEB(0.0, 0.0,
+                                                                10.0, 0.0),
+                                                    child: StreamBuilder<
+                                                        List<ConversasRecord>>(
+                                                      stream:
+                                                          queryConversasRecord(
+                                                        queryBuilder:
+                                                            (conversasRecord) =>
+                                                                conversasRecord
+                                                                    .where(
+                                                          'conversaId',
+                                                          isEqualTo:
+                                                              detalhesCorridaClienteViagensRow
+                                                                  ?.idConversa,
+                                                        ),
+                                                        singleRecord: true,
+                                                      ),
+                                                      builder:
+                                                          (context, snapshot) {
+                                                        // Customize what your widget looks like when it's loading.
+                                                        if (!snapshot.hasData) {
+                                                          return Center(
+                                                            child: SizedBox(
+                                                              width: 50.0,
+                                                              height: 50.0,
+                                                              child:
+                                                                  CircularProgressIndicator(
+                                                                valueColor:
+                                                                    AlwaysStoppedAnimation<
+                                                                        Color>(
+                                                                  FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .secondary,
+                                                                ),
                                                               ),
                                                             ),
-                                                          ),
-                                                        );
-                                                      }
-                                                      List<ConversasRecord>
-                                                          badgeConversasRecordList =
-                                                          snapshot.data!;
-                                                      // Return an empty Container when the item does not exist.
-                                                      if (snapshot
-                                                          .data!.isEmpty) {
-                                                        return Container();
-                                                      }
-                                                      final badgeConversasRecord =
-                                                          badgeConversasRecordList
-                                                                  .isNotEmpty
-                                                              ? badgeConversasRecordList
-                                                                  .first
-                                                              : null;
+                                                          );
+                                                        }
+                                                        List<ConversasRecord>
+                                                            badgeConversasRecordList =
+                                                            snapshot.data!;
+                                                        // Return an empty Container when the item does not exist.
+                                                        if (snapshot
+                                                            .data!.isEmpty) {
+                                                          return Container();
+                                                        }
+                                                        final badgeConversasRecord =
+                                                            badgeConversasRecordList
+                                                                    .isNotEmpty
+                                                                ? badgeConversasRecordList
+                                                                    .first
+                                                                : null;
 
-                                                      return badges.Badge(
-                                                        badgeContent: Text(
-                                                          badgeConversasRecord!
-                                                                  .quemLeu
-                                                                  .contains(
-                                                                      rowUsersRecord
-                                                                          ?.reference)
-                                                              ? '1'
-                                                              : ' ',
-                                                          style: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .titleSmall
-                                                              .override(
-                                                                font: GoogleFonts
-                                                                    .poppins(
+                                                        return badges.Badge(
+                                                          badgeContent: Text(
+                                                            badgeConversasRecord!
+                                                                    .quemLeu
+                                                                    .contains(
+                                                                        rowUsersRecord
+                                                                            ?.reference)
+                                                                ? '1'
+                                                                : ' ',
+                                                            style: FlutterFlowTheme
+                                                                    .of(context)
+                                                                .titleSmall
+                                                                .override(
+                                                                  font: GoogleFonts
+                                                                      .poppins(
+                                                                    fontWeight: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .titleSmall
+                                                                        .fontWeight,
+                                                                    fontStyle: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .titleSmall
+                                                                        .fontStyle,
+                                                                  ),
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .secondary,
+                                                                  fontSize:
+                                                                      12.0,
+                                                                  letterSpacing:
+                                                                      0.0,
                                                                   fontWeight: FlutterFlowTheme.of(
                                                                           context)
                                                                       .titleSmall
@@ -532,97 +554,86 @@ class _DetalhesCorridaClienteWidgetState
                                                                       .titleSmall
                                                                       .fontStyle,
                                                                 ),
-                                                                color: FlutterFlowTheme.of(
+                                                          ),
+                                                          showBadge: true,
+                                                          shape: badges
+                                                              .BadgeShape
+                                                              .circle,
+                                                          badgeColor:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .info,
+                                                          elevation: 3.0,
+                                                          padding:
+                                                              EdgeInsetsDirectional
+                                                                  .fromSTEB(
+                                                                      8.0,
+                                                                      8.0,
+                                                                      8.0,
+                                                                      8.0),
+                                                          position: badges
+                                                                  .BadgePosition
+                                                              .topEnd(),
+                                                          animationType: badges
+                                                              .BadgeAnimationType
+                                                              .scale,
+                                                          toAnimate: true,
+                                                          child:
+                                                              FlutterFlowIconButton(
+                                                            borderColor:
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .primary,
+                                                            borderRadius: 8.0,
+                                                            borderWidth: 2.0,
+                                                            buttonSize: 40.0,
+                                                            fillColor:
+                                                                FlutterFlowTheme.of(
                                                                         context)
                                                                     .secondary,
-                                                                fontSize: 12.0,
-                                                                letterSpacing:
-                                                                    0.0,
-                                                                fontWeight: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleSmall
-                                                                    .fontWeight,
-                                                                fontStyle: FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .titleSmall
-                                                                    .fontStyle,
-                                                              ),
-                                                        ),
-                                                        showBadge: true,
-                                                        shape: badges
-                                                            .BadgeShape.circle,
-                                                        badgeColor:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .info,
-                                                        elevation: 3.0,
-                                                        padding:
-                                                            EdgeInsetsDirectional
-                                                                .fromSTEB(
-                                                                    8.0,
-                                                                    8.0,
-                                                                    8.0,
-                                                                    8.0),
-                                                        position:
-                                                            badges.BadgePosition
-                                                                .topEnd(),
-                                                        animationType: badges
-                                                            .BadgeAnimationType
-                                                            .scale,
-                                                        toAnimate: true,
-                                                        child:
-                                                            FlutterFlowIconButton(
-                                                          borderColor:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .primary,
-                                                          borderRadius: 8.0,
-                                                          borderWidth: 2.0,
-                                                          buttonSize: 40.0,
-                                                          fillColor:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .secondary,
-                                                          icon: Icon(
-                                                            Icons.chat,
-                                                            color: FlutterFlowTheme
-                                                                    .of(context)
-                                                                .info,
-                                                            size: 24.0,
+                                                            icon: Icon(
+                                                              Icons.chat,
+                                                              color: FlutterFlowTheme
+                                                                      .of(context)
+                                                                  .info,
+                                                              size: 24.0,
+                                                            ),
+                                                            onPressed:
+                                                                () async {
+                                                              context.pushNamed(
+                                                                ChatAbertoWidget
+                                                                    .routeName,
+                                                                queryParameters:
+                                                                    {
+                                                                  'comQuem':
+                                                                      serializeParam(
+                                                                    rowUsersRecord
+                                                                        ?.reference,
+                                                                    ParamType
+                                                                        .DocumentReference,
+                                                                  ),
+                                                                  'conversa':
+                                                                      serializeParam(
+                                                                    badgeConversasRecord
+                                                                        .reference,
+                                                                    ParamType
+                                                                        .DocumentReference,
+                                                                  ),
+                                                                }.withoutNulls,
+                                                              );
+                                                            },
                                                           ),
-                                                          onPressed: () async {
-                                                            context.pushNamed(
-                                                              ChatAbertoWidget
-                                                                  .routeName,
-                                                              queryParameters: {
-                                                                'comQuem':
-                                                                    serializeParam(
-                                                                  rowUsersRecord
-                                                                      ?.reference,
-                                                                  ParamType
-                                                                      .DocumentReference,
-                                                                ),
-                                                                'conversa':
-                                                                    serializeParam(
-                                                                  badgeConversasRecord
-                                                                      .reference,
-                                                                  ParamType
-                                                                      .DocumentReference,
-                                                                ),
-                                                              }.withoutNulls,
-                                                            );
-                                                          },
-                                                        ),
-                                                      );
-                                                    },
+                                                        );
+                                                      },
+                                                    ),
                                                   ),
-                                                ),
-                                              ],
-                                            );
-                                          },
+                                                ],
+                                              );
+                                            },
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ].addToEnd(SizedBox(height: 22.0)),
+                                    ),
                                   ),
                                 ),
                               ),
