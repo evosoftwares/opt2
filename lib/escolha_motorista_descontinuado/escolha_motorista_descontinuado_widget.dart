@@ -211,279 +211,292 @@ class _EscolhaMotoristaDescontinuadoWidgetState
                                           hoverColor: Colors.transparent,
                                           highlightColor: Colors.transparent,
                                           onTap: () async {
-                                            var confirmDialogResponse =
-                                                await showDialog<bool>(
-                                                      context: context,
-                                                      builder:
-                                                          (alertDialogContext) {
-                                                        return AlertDialog(
-                                                          title: Text(
-                                                              'Chamar motorista'),
-                                                          content: Text(
-                                                              'Tem certeza que deseja chamar esse motorista?'),
-                                                          actions: [
-                                                            TextButton(
-                                                              onPressed: () =>
-                                                                  Navigator.pop(
-                                                                      alertDialogContext,
-                                                                      false),
-                                                              child: Text(
-                                                                  'Não chamar'),
-                                                            ),
-                                                            TextButton(
-                                                              onPressed: () =>
-                                                                  Navigator.pop(
-                                                                      alertDialogContext,
-                                                                      true),
-                                                              child: Text(
-                                                                  'Confirmar'),
-                                                            ),
-                                                          ],
-                                                        );
+                                            final firestoreBatch =
+                                                FirebaseFirestore.instance
+                                                    .batch();
+                                            try {
+                                              var confirmDialogResponse =
+                                                  await showDialog<bool>(
+                                                        context: context,
+                                                        builder:
+                                                            (alertDialogContext) {
+                                                          return AlertDialog(
+                                                            title: Text(
+                                                                'Chamar motorista'),
+                                                            content: Text(
+                                                                'Tem certeza que deseja chamar esse motorista?'),
+                                                            actions: [
+                                                              TextButton(
+                                                                onPressed: () =>
+                                                                    Navigator.pop(
+                                                                        alertDialogContext,
+                                                                        false),
+                                                                child: Text(
+                                                                    'Não chamar'),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () =>
+                                                                    Navigator.pop(
+                                                                        alertDialogContext,
+                                                                        true),
+                                                                child: Text(
+                                                                    'Confirmar'),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      ) ??
+                                                      false;
+                                              if (confirmDialogResponse) {
+                                                _model.queryOferta =
+                                                    await OfertasTable()
+                                                        .queryRows(
+                                                  queryFn: (q) => q
+                                                      .eqOrNull(
+                                                        'viagemid',
+                                                        widget.qualCorrida
+                                                            ?.viagemid,
+                                                      )
+                                                      .eqOrNull(
+                                                        'motoristaid',
+                                                        containerUsersRecord
+                                                            ?.uid,
+                                                      ),
+                                                );
+                                                if (valueOrDefault(
+                                                        currentUserDocument
+                                                            ?.emCarteira,
+                                                        0.0) >=
+                                                    valueOrDefault<double>(
+                                                      _model
+                                                          .queryOferta
+                                                          ?.firstOrNull
+                                                          ?.precoofertado,
+                                                      0.0,
+                                                    )) {
+                                                  await actions
+                                                      .selecionarMotoristaEFinalizarOfertas(
+                                                    widget
+                                                        .qualCorrida!.viagemid,
+                                                    containerUsersRecord!.uid,
+                                                    FFAppState().keyMaps,
+                                                  );
+
+                                                  var conversasRecordReference =
+                                                      ConversasRecord.collection
+                                                          .doc();
+                                                  firestoreBatch.set(
+                                                      conversasRecordReference,
+                                                      {
+                                                        ...createConversasRecordData(
+                                                          statusConversa:
+                                                              StatusConversaPeloStatusServico
+                                                                  .andamento,
+                                                        ),
+                                                        ...mapToFirestore(
+                                                          {
+                                                            'participantes': [
+                                                              currentUserReference
+                                                            ],
+                                                            'quemLeu': [
+                                                              currentUserReference
+                                                            ],
+                                                          },
+                                                        ),
+                                                      });
+                                                  _model.atualizaPessoa =
+                                                      ConversasRecord
+                                                          .getDocumentFromData({
+                                                    ...createConversasRecordData(
+                                                      statusConversa:
+                                                          StatusConversaPeloStatusServico
+                                                              .andamento,
+                                                    ),
+                                                    ...mapToFirestore(
+                                                      {
+                                                        'participantes': [
+                                                          currentUserReference
+                                                        ],
+                                                        'quemLeu': [
+                                                          currentUserReference
+                                                        ],
                                                       },
-                                                    ) ??
-                                                    false;
-                                            if (confirmDialogResponse) {
-                                              _model.queryOferta =
-                                                  await OfertasTable()
-                                                      .queryRows(
-                                                queryFn: (q) => q
-                                                    .eqOrNull(
+                                                    ),
+                                                  }, conversasRecordReference);
+
+                                                  var mensagensRecordReference =
+                                                      MensagensRecord.collection
+                                                          .doc();
+                                                  firestoreBatch.set(
+                                                      mensagensRecordReference,
+                                                      createMensagensRecordData(
+                                                        createdAt:
+                                                            getCurrentTimestamp,
+                                                        mensagem:
+                                                            'Olá, estou solicitando a corrida.',
+                                                        conversaID: _model
+                                                            .atualizaPessoa
+                                                            ?.reference,
+                                                        enviadoPor:
+                                                            currentUserReference,
+                                                        ehMensagem: true,
+                                                      ));
+                                                  _model.mensagemEnviada =
+                                                      MensagensRecord
+                                                          .getDocumentFromData(
+                                                              createMensagensRecordData(
+                                                                createdAt:
+                                                                    getCurrentTimestamp,
+                                                                mensagem:
+                                                                    'Olá, estou solicitando a corrida.',
+                                                                conversaID: _model
+                                                                    .atualizaPessoa
+                                                                    ?.reference,
+                                                                enviadoPor:
+                                                                    currentUserReference,
+                                                                ehMensagem:
+                                                                    true,
+                                                              ),
+                                                              mensagensRecordReference);
+                                                  await ViagensTable().update(
+                                                    data: {
+                                                      'idConversa': _model
+                                                          .atualizaPessoa
+                                                          ?.reference
+                                                          .id,
+                                                      'precosugerido':
+                                                          valueOrDefault<
+                                                              double>(
+                                                        (containerUsersRecord
+                                                                        .minhaTarifa *
+                                                                    functions.distanciaOrigemDestino(
+                                                                        functions.strToLatLng(widget
+                                                                            .qualCorrida
+                                                                            ?.origem)!,
+                                                                        functions.strToLatLng(widget
+                                                                            .qualCorrida
+                                                                            ?.destino)!) *
+                                                                    100)
+                                                                .ceilToDouble() /
+                                                            100,
+                                                        0.0,
+                                                      ),
+                                                    },
+                                                    matchingRows: (rows) =>
+                                                        rows.eqOrNull(
                                                       'viagemid',
                                                       widget.qualCorrida
                                                           ?.viagemid,
-                                                    )
-                                                    .eqOrNull(
-                                                      'motoristaid',
-                                                      containerUsersRecord?.uid,
                                                     ),
-                                              );
-                                              if (valueOrDefault(
-                                                      currentUserDocument
-                                                          ?.emCarteira,
-                                                      0.0) >=
-                                                  valueOrDefault<double>(
-                                                    _model
-                                                        .queryOferta
-                                                        ?.firstOrNull
-                                                        ?.precoofertado,
-                                                    0.0,
-                                                  )) {
-                                                await actions
-                                                    .selecionarMotoristaEFinalizarOfertas(
-                                                  widget.qualCorrida!.viagemid,
-                                                  containerUsersRecord!.uid,
-                                                  FFAppState().keyMaps,
-                                                );
+                                                  );
 
-                                                var conversasRecordReference =
-                                                    ConversasRecord.collection
-                                                        .doc();
-                                                await conversasRecordReference
-                                                    .set({
-                                                  ...createConversasRecordData(
-                                                    statusConversa:
-                                                        StatusConversaPeloStatusServico
-                                                            .andamento,
-                                                  ),
-                                                  ...mapToFirestore(
-                                                    {
-                                                      'participantes': [
-                                                        currentUserReference
-                                                      ],
-                                                      'quemLeu': [
-                                                        currentUserReference
-                                                      ],
-                                                    },
-                                                  ),
-                                                });
-                                                _model.atualizaPessoa =
-                                                    ConversasRecord
-                                                        .getDocumentFromData({
-                                                  ...createConversasRecordData(
-                                                    statusConversa:
-                                                        StatusConversaPeloStatusServico
-                                                            .andamento,
-                                                  ),
-                                                  ...mapToFirestore(
-                                                    {
-                                                      'participantes': [
-                                                        currentUserReference
-                                                      ],
-                                                      'quemLeu': [
-                                                        currentUserReference
-                                                      ],
-                                                    },
-                                                  ),
-                                                }, conversasRecordReference);
+                                                  firestoreBatch.update(
+                                                      _model.mensagemEnviada!
+                                                          .reference,
+                                                      createMensagensRecordData(
+                                                        mensagensId: _model
+                                                            .mensagemEnviada
+                                                            ?.reference
+                                                            .id,
+                                                      ));
 
-                                                var mensagensRecordReference =
-                                                    MensagensRecord.collection
-                                                        .doc();
-                                                await mensagensRecordReference
-                                                    .set(
-                                                        createMensagensRecordData(
-                                                  createdAt:
-                                                      getCurrentTimestamp,
-                                                  mensagem:
-                                                      'Olá, estou solicitando a corrida.',
-                                                  conversaID: _model
-                                                      .atualizaPessoa
-                                                      ?.reference,
-                                                  enviadoPor:
-                                                      currentUserReference,
-                                                  ehMensagem: true,
-                                                ));
-                                                _model.mensagemEnviada =
-                                                    MensagensRecord.getDocumentFromData(
-                                                        createMensagensRecordData(
-                                                          createdAt:
-                                                              getCurrentTimestamp,
-                                                          mensagem:
-                                                              'Olá, estou solicitando a corrida.',
-                                                          conversaID: _model
+                                                  firestoreBatch.update(
+                                                      _model.atualizaPessoa!
+                                                          .reference,
+                                                      {
+                                                        ...createConversasRecordData(
+                                                          ultimaMensagem: _model
                                                               .atualizaPessoa
-                                                              ?.reference,
-                                                          enviadoPor:
-                                                              currentUserReference,
-                                                          ehMensagem: true,
+                                                              ?.ultimaMensagem,
+                                                          conversaId: _model
+                                                              .atualizaPessoa
+                                                              ?.reference
+                                                              .id,
                                                         ),
-                                                        mensagensRecordReference);
-                                                await ViagensTable().update(
-                                                  data: {
-                                                    'idConversa': _model
-                                                        .atualizaPessoa
-                                                        ?.reference
-                                                        .id,
-                                                    'precosugerido':
-                                                        valueOrDefault<double>(
-                                                      (containerUsersRecord
-                                                                      .minhaTarifa *
-                                                                  functions.distanciaOrigemDestino(
-                                                                      functions.strToLatLng(widget
-                                                                          .qualCorrida
-                                                                          ?.origem)!,
-                                                                      functions.strToLatLng(widget
-                                                                          .qualCorrida
-                                                                          ?.destino)!) *
-                                                                  100)
-                                                              .ceilToDouble() /
-                                                          100,
-                                                      0.0,
-                                                    ),
-                                                  },
-                                                  matchingRows: (rows) =>
-                                                      rows.eqOrNull(
-                                                    'viagemid',
-                                                    widget
-                                                        .qualCorrida?.viagemid,
-                                                  ),
-                                                );
-
-                                                await _model
-                                                    .mensagemEnviada!.reference
-                                                    .update(
-                                                        createMensagensRecordData(
-                                                  mensagensId: _model
-                                                      .mensagemEnviada
-                                                      ?.reference
-                                                      .id,
-                                                ));
-
-                                                await _model
-                                                    .atualizaPessoa!.reference
-                                                    .update({
-                                                  ...createConversasRecordData(
-                                                    ultimaMensagem: _model
-                                                        .atualizaPessoa
-                                                        ?.ultimaMensagem,
-                                                    conversaId: _model
-                                                        .atualizaPessoa
-                                                        ?.reference
-                                                        .id,
-                                                  ),
-                                                  ...mapToFirestore(
-                                                    {
-                                                      'participantes':
-                                                          FieldValue
-                                                              .arrayUnion([
-                                                        functions
-                                                            .convertStringEmReference(
-                                                                containerUsersRecord
-                                                                    .reference
-                                                                    .id)
-                                                      ]),
-                                                    },
-                                                  ),
-                                                });
-
-                                                context.pushNamed(
-                                                  DetalhesCorridaClienteWidget
-                                                      .routeName,
-                                                  queryParameters: {
-                                                    'qualCorrida':
-                                                        serializeParam(
-                                                      widget.qualCorrida,
-                                                      ParamType.SupabaseRow,
-                                                    ),
-                                                    'motoristaId':
-                                                        serializeParam(
-                                                      containerUsersRecord
-                                                          .reference.id,
-                                                      ParamType.String,
-                                                    ),
-                                                  }.withoutNulls,
-                                                );
-                                              } else {
-                                                confirmDialogResponse =
-                                                    await showDialog<bool>(
-                                                          context: context,
-                                                          builder:
-                                                              (alertDialogContext) {
-                                                            return AlertDialog(
-                                                              title: Text(
-                                                                  'Atenção'),
-                                                              content: Text(
-                                                                  'Você não possui créditos suficientes para escolher esta oferta. Gostaria de adicionar agora?'),
-                                                              actions: [
-                                                                TextButton(
-                                                                  onPressed: () =>
-                                                                      Navigator.pop(
-                                                                          alertDialogContext,
-                                                                          false),
-                                                                  child: Text(
-                                                                      'Não'),
-                                                                ),
-                                                                TextButton(
-                                                                  onPressed: () =>
-                                                                      Navigator.pop(
-                                                                          alertDialogContext,
-                                                                          true),
-                                                                  child: Text(
-                                                                      'Sim'),
-                                                                ),
-                                                              ],
-                                                            );
+                                                        ...mapToFirestore(
+                                                          {
+                                                            'participantes':
+                                                                FieldValue
+                                                                    .arrayUnion([
+                                                              functions.convertStringEmReference(
+                                                                  containerUsersRecord
+                                                                      .reference
+                                                                      .id)
+                                                            ]),
                                                           },
-                                                        ) ??
-                                                        false;
-                                                if (confirmDialogResponse) {
+                                                        ),
+                                                      });
+
                                                   context.pushNamed(
-                                                    AdicionarCreditosWidget
+                                                    DetalhesCorridaClienteWidget
                                                         .routeName,
                                                     queryParameters: {
-                                                      'valorEsperado':
+                                                      'qualCorrida':
                                                           serializeParam(
-                                                        _model
-                                                            .queryOferta
-                                                            ?.firstOrNull
-                                                            ?.precoofertado,
-                                                        ParamType.double,
+                                                        widget.qualCorrida,
+                                                        ParamType.SupabaseRow,
+                                                      ),
+                                                      'motoristaId':
+                                                          serializeParam(
+                                                        containerUsersRecord
+                                                            .reference.id,
+                                                        ParamType.String,
                                                       ),
                                                     }.withoutNulls,
                                                   );
+                                                } else {
+                                                  confirmDialogResponse =
+                                                      await showDialog<bool>(
+                                                            context: context,
+                                                            builder:
+                                                                (alertDialogContext) {
+                                                              return AlertDialog(
+                                                                title: Text(
+                                                                    'Atenção'),
+                                                                content: Text(
+                                                                    'Você não possui créditos suficientes para escolher esta oferta. Gostaria de adicionar agora?'),
+                                                                actions: [
+                                                                  TextButton(
+                                                                    onPressed: () =>
+                                                                        Navigator.pop(
+                                                                            alertDialogContext,
+                                                                            false),
+                                                                    child: Text(
+                                                                        'Não'),
+                                                                  ),
+                                                                  TextButton(
+                                                                    onPressed: () =>
+                                                                        Navigator.pop(
+                                                                            alertDialogContext,
+                                                                            true),
+                                                                    child: Text(
+                                                                        'Sim'),
+                                                                  ),
+                                                                ],
+                                                              );
+                                                            },
+                                                          ) ??
+                                                          false;
+                                                  if (confirmDialogResponse) {
+                                                    context.pushNamed(
+                                                      AdicionarCreditosWidget
+                                                          .routeName,
+                                                      queryParameters: {
+                                                        'valorEsperado':
+                                                            serializeParam(
+                                                          _model
+                                                              .queryOferta
+                                                              ?.firstOrNull
+                                                              ?.precoofertado,
+                                                          ParamType.double,
+                                                        ),
+                                                      }.withoutNulls,
+                                                    );
+                                                  }
                                                 }
                                               }
+                                            } finally {
+                                              await firestoreBatch.commit();
                                             }
 
                                             safeSetState(() {});
